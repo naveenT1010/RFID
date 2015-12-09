@@ -28,11 +28,14 @@ class RfidAccessSystem(object):
 		while(self.running):
 			if(not self.iq.empty()):
 				#Handle Exceptions here
-				rfid = self.iq.get();
+				temp = self.iq.get();
+				rfid = temp[0];
+				rollno = temp[1];
 				query = "SELECT * FROM "+ self.tableName +" WHERE RFID= "+ str(rfid);
 				
 				##TEST CODE
-				print "In RfidAccessSystem:getRowFromDB, RFID : ", rfid;
+				# print "In RfidAccessSystem:getRowFromDB, RFID : ", rfid;
+				# print "In RfidAccessSystem:getRowFromDB, RollNo : ", rollno;
 
 				#Handle Exceptions here
 				self.cur.execute(query);
@@ -40,10 +43,6 @@ class RfidAccessSystem(object):
 				
 				#Handle Exceptions here
 				self.oq.put(data);
-
-				#TEST CODE	
-				if(not data):
-					print "No data.";
 
 
 

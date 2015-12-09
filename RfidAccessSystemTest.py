@@ -17,10 +17,9 @@ if __name__ == '__main__':
 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
 	p.start()
 
-print "Getting Data from oq in main"
 while(True):
 	try:
-		print "Getting Data from oq : ",oq.get();
+		print oq.get();
 	except(KeyboardInterrupt, SystemExit):
 		print "KeyboardInterrupt in main. Exiting"
 		rfas.stopThread();
