@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 import util
+import time
 
 continue_reading = True #Boolean that changes to false when sigint is captured.
 
@@ -99,3 +100,5 @@ def waitForCard(iq):
 			temp.append(rfid)
 			temp.append(rollno);
 			iq.put(temp);
+			time.sleep(5);
+

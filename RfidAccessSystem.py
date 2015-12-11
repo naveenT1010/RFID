@@ -28,6 +28,7 @@ class RfidAccessSystem(object):
 		while(self.running):
 			if(not self.iq.empty()):
 				#Handle Exceptions here
+				# rfid = self.iq.get();
 				temp = self.iq.get();
 				rfid = temp[0];
 				rollno = temp[1];
@@ -43,6 +44,12 @@ class RfidAccessSystem(object):
 				
 				#Handle Exceptions here
 				self.oq.put(data);
+
+				if(not data):
+					query = "INSERT INTO " + self.tableName + " ( rfid , rollno ) " + " VALUES (" + str(rfid) + "," + "'" +rollno + "'"+ ")"
+					self.cur.execute(query);
+					self.db.commit();
+					print query;
 
 
 
