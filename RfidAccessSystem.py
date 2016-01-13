@@ -1,13 +1,16 @@
 import MySQLdb
 import threading
 import multiprocessing
+import datetime
+import Queue
 
 class RfidAccessSystem(object):
-	def __init__(self, dbName, tableName, iq, oq):
+	def __init__(self, sql_db, dbTable, logTable, iq, oq):
 		print "INIT OF RfidAccessSystem."
-		self.dbName = dbName;
-		self.tableName = tableName;
-		self.db  = MySQLdb.connect('localhost','pi','raspberry', dbName);
+		self.sql_db = sql_db #The sql database name
+		self.dbTable = dbTable #Table that stores the users of the system
+		self.logTable = logTable #Table that stores logs
+		self.db  = MySQLdb.connect('localhost','pi','raspberry', sql_db);
 		self.cur = self.db.cursor();
 		self.iq  = iq;
 		self.oq  = oq;
@@ -26,24 +29,48 @@ class RfidAccessSystem(object):
 
 	def getRowFromDB(self):
 		while(self.running):
-			if(not self.iq.empty()):
-				#Handle Exceptions here
-				rfid = self.iq.get();
-				query = "SELECT * FROM "+ self.tableName +" WHERE RFID= "+ str(rfid);
-				
-				##TEST CODE
-				print "In RfidAccessSystem:getRowFromDB, RFID : ", rfid;
+			#Get the data from the q
+			try:
+				temp = self.iq.get(True, 5)
+			except Queue.Empty:
+				continue
+			rfid = temp[0]
+			timestamp = temp[1]
 
-				#Handle Exceptions here
-				self.cur.execute(query);
-				data = self.cur.fetchall();
-				
-				#Handle Exceptions here
-				self.oq.put(data);
+			#Try to get the row from dbTable
+			select_query = "SELECT * FROM "+ self.dbTable +" WHERE RFID= "+ str(rfid);
+			self.cur.execute(select_query)
+			data = self.cur.fetchall()
 
-				#TEST CODE	
-				if(not data):
-					print "No data.";
+			#Handle the various cases
+			if(len(data)>1): #RFID is not UNIQUE in dbTable
+				#Throw rfid not unique exception
+				print "Duplicate RFID in dbTable"
+			elif(len(data)==1): #We got exactly one row from dbTable
+				#Return the row to application
+				data = list(data[0]); #Convert from tuple to list
+				data.insert(0,timestamp); #Add the timestamp to the data
+			else: #The card is new
+				#Create an entry in db with rfid
+				insert_query = "INSERT INTO " + self.dbTable + " (rfid) VALUES " + "(" + str(rfid) + ")"
+				self.cur.execute(insert_query)
+				self.db.commit();
+				#Select this entry
+				select_query = "SELECT * FROM "+ self.dbTable +" WHERE RFID= "+ str(rfid);
+				self.cur.execute(select_query)
+				data = self.cur.fetchall()
+				#Add timestamp
+				data = list(data[0]); #Convert from tuple to list
+				data.insert(0,timestamp); #Add the timestamp to the data
+				
+			#Send it to application
+			#Put the data into the output q
+			self.oq.put(data);
+
+			#Update the Log Table with the timestamp and rfid
+			insert_query = "INSERT INTO " + self.logTable + " (timestamp, rfid) VALUES " + "(" + "'" +timestamp.strftime("%Y-%m-%d %H:%M:%S") + "'" + "," + str(rfid) + ")"
+			self.cur.execute(insert_query)
+			self.db.commit()
 
 
 

@@ -6,21 +6,22 @@ import signal
 import Reader
 
 #Init 
-dbName = "IITG";
-tableName = "students";
+sql_db = "IITG"
+dbTable = "students"
+logTable = "logs"
 iq = multiprocessing.Queue();
 oq = multiprocessing.Queue();
-rfas = RfidAccessSystem.RfidAccessSystem(dbName,tableName,iq,oq);
+rfas = RfidAccessSystem.RfidAccessSystem(sql_db,dbTable,logTable,iq,oq);
 
 #Run waitForCard in separate process.
 if __name__ == '__main__':
 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
 	p.start()
 
-print "Getting Data from oq in main"
 while(True):
 	try:
-		print "Getting Data from oq : ",oq.get();
+		data = oq.get();
+		print data;
 	except(KeyboardInterrupt, SystemExit):
 		print "KeyboardInterrupt in main. Exiting"
 		rfas.stopThread();
