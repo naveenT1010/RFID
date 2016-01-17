@@ -4,14 +4,12 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 import Reader
+import Constants
 
 #Init 
-sql_db = "IITG"
-dbTable = "students"
-logTable = "logs"
 iq = multiprocessing.Queue();
 oq = multiprocessing.Queue();
-rfas = RfidAccessSystem.RfidAccessSystem(sql_db,dbTable,logTable,iq,oq);
+rfas = RfidAccessSystem.RfidAccessSystem(Constants.sql_db,Constants.dbTable,Constants.logTable,iq,oq);
 
 #Run waitForCard in separate process.
 if __name__ == '__main__':
@@ -21,7 +19,10 @@ if __name__ == '__main__':
 while(True):
 	try:
 		data = oq.get();
-		print data;
+		print data
+		if(data[2] is None):
+			temp = {'rfid':data[1],'name':'Rishabh','rollno':'I dont know'}
+			rfas.updateDbTable(temp)
 	except(KeyboardInterrupt, SystemExit):
 		print "KeyboardInterrupt in main. Exiting"
 		rfas.stopThread();

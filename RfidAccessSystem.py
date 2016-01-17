@@ -3,6 +3,7 @@ import threading
 import multiprocessing
 import datetime
 import Queue
+import Constants
 
 class RfidAccessSystem(object):
 	def __init__(self, sql_db, dbTable, logTable, iq, oq):
@@ -10,7 +11,7 @@ class RfidAccessSystem(object):
 		self.sql_db = sql_db #The sql database name
 		self.dbTable = dbTable #Table that stores the users of the system
 		self.logTable = logTable #Table that stores logs
-		self.db  = MySQLdb.connect('localhost','pi','raspberry', sql_db);
+		self.db  = MySQLdb.connect('localhost','pi','raspberry', self.sql_db);
 		self.cur = self.db.cursor();
 		self.iq  = iq;
 		self.oq  = oq;
@@ -31,7 +32,7 @@ class RfidAccessSystem(object):
 		while(self.running):
 			#Get the data from the q
 			try:
-				temp = self.iq.get(True, 5)
+				temp = self.iq.get(True, Constants.timeOut)
 			except Queue.Empty:
 				continue
 			rfid = temp[0]
@@ -72,7 +73,28 @@ class RfidAccessSystem(object):
 			self.cur.execute(insert_query)
 			self.db.commit()
 
+	def updateDbTable(self,data):
+		rfid = data['rfid']
+		del data['rfid']
 
+		#SQL UPDATE STATEMENT GENERIC SYNTAX
+		#UPDATE table_name
+		#SET column1=value1,column2=value2,...
+		#WHERE some_column=some_value;
 
-			
+		update_query = "UPDATE " + self.dbTable + " SET "
+		temp = [str(i[0])+"="+"'"+str(i[1])+"'" for i in list(data.iteritems())]
+		update_query = update_query + ",".join(temp)
+		update_query = update_query + " WHERE rfid=" + str(rfid)
+
+		#Cant use the same db and cursor objects as getRowFromDB
+		#Probably because its running in a separate thread
+		tempdb = MySQLdb.connect('localhost','pi','raspberry', self.sql_db)
+		tempcur = tempdb.cursor()
+		tempcur.execute(update_query)
+		tempdb.commit()
+
+	#Need to add this
+	# def updateLogTable():
+
 

@@ -5,6 +5,7 @@ import signal
 import util
 import time
 import datetime
+import Constants
 
 continue_reading = True #Boolean that changes to false when sigint is captured.
 
@@ -50,7 +51,7 @@ def waitForCard(iq):
 			iq.put(temp);
 			#If we put a card in the queue, wait for 5 seconds.
 			#This is to avoid sending the same card several times.
-			time.sleep(5);
+			time.sleep(Constants.timeSleep);
 
 			# #TEST CODE
 			# print "Card detected.";
