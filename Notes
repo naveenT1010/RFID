@@ -1,0 +1,23 @@
+Need to change the "RfidAccessSystem" class to "RfidSystem"
+
+Rules for updateDbTable and updateLogTable
+The column names or the keys of the dictionary passed to updateDbTable and updateLogTable must be python strings
+For the values of the dictionary passed,
+At python end, allowed data types are 
+	All Numeric types except complex - int, long, float
+	strings - str
+	datetime.datetime object
+At mysql end(in dbTable and logTable), allowed datatypes are,
+	All Numeric types - INT, TINYINT, SMALLINT, MEDIUMINT, BIGINT, FLOAT, DOUBLE, DECIMAL
+	TEXT and ENUM
+	DATETIME
+RfidSystem has a type conversion function that will convert python data to sql data of corresponding type
+That is, 
+	a numeric type of python	<--->	a numeric type of sql
+	string in python			<--->	TEXT in sql(or ENUM)
+	datetime in python			<--->	DATETIME in sql
+
+
+
+
+

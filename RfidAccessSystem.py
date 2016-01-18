@@ -73,28 +73,79 @@ class RfidAccessSystem(object):
 			self.cur.execute(insert_query)
 			self.db.commit()
 
+	#The data is a dict of column name : value
+	#The column name should be a string that matches one of the columns of dbTable
+	#The value should be of the correct datatype and format that you would use in a sql query.
+		#Thus, strings should be enclosed by another pair of quotes
+		#Date and Time should be of correct format
 	def updateDbTable(self,data):
+		data = self.typeConversion(data)
+
 		rfid = data['rfid']
 		del data['rfid']
 
-		#SQL UPDATE STATEMENT GENERIC SYNTAX
-		#UPDATE table_name
-		#SET column1=value1,column2=value2,...
-		#WHERE some_column=some_value;
-
 		update_query = "UPDATE " + self.dbTable + " SET "
-		temp = [str(i[0])+"="+"'"+str(i[1])+"'" for i in list(data.iteritems())]
+		temp = [i[0]+"="+i[1] for i in list(data.iteritems())]
 		update_query = update_query + ",".join(temp)
-		update_query = update_query + " WHERE rfid=" + str(rfid)
+		update_query = update_query + " WHERE rfid=" + rfid
+
+		#TEST CODE
+		print update_query
 
 		#Cant use the same db and cursor objects as getRowFromDB
-		#Probably because its running in a separate thread
+		#Probably because its always running in a separate thread
 		tempdb = MySQLdb.connect('localhost','pi','raspberry', self.sql_db)
 		tempcur = tempdb.cursor()
 		tempcur.execute(update_query)
 		tempdb.commit()
 
-	#Need to add this
-	# def updateLogTable():
+	#The data is a dict of column-name : value
+	#The column name should be a string that matches one of the columns of logTable
+	#The value should be of the correct datatype and format that you would use in a sql query.
+		#Thus, srtings should be enclosed by another pair of quotes
+		#Date and Time should be of correct format
+	# def updateLogTable(self,data):
+	# 	data = self.typeConversion(data)
+
+	# 	timestamp = data['timestamp']
+	# 	del data['timestamp']
+
+	# 	update_query = "UPDATE " + self.logTable + " SET "
+	# 	temp = [str(i[0])+"="+str(i[1]) for i in list(data.iteritems())]
+	# 	update_query = update_query + ",".join(temp)
+	# 	update_query = update_query + " WHERE timestamp=" + str(timestamp)
+
+	# 	print update_query
+
+	#The data is a dict of column-name : value
+	def typeConversion(self,data):
+		#Check if column names are strings
+		for i in data:
+			if type(i)!=str:
+				#Throw an Exception saying, column names should be strings
+				print "Column Names should be strings"
+
+		#Transform dictionary for processing
+		temp = {i[0] : (str(i[1]), type(i[1])) for i in data.iteritems()}
+
+		#Convert python types into suitable mysql types
+		temp2 = {}
+		for i in temp:
+			if( (temp[i][1]==int)or(temp[i][1]==long)or(temp[i][1]==float) ):
+				temp2[i] = temp[i][0]
+			elif( temp[i][1]==str ):
+				temp2[i] = '"' + temp[i][0] + '"'
+			elif( temp[i][1]==datetime.datetime ):
+				#Convert string back to date
+				temp2[i] = datetime.datetime.strptime(temp[i][0], "%Y-%m-%d %H:%M:%S.%f")
+				#Convert date to DATETIME format of mysql
+				temp2[i] = temp2[i].strftime("%Y-%m-%d %H:%M:%S")
+			else:
+				#The python type doesnt have support yet
+				print "The python type doesnt have support yet, contact developer"
+
+		return temp2
+
+
 
 

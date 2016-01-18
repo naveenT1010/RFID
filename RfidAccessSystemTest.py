@@ -18,11 +18,19 @@ if __name__ == '__main__':
 
 while(True):
 	try:
+		#Print the result
 		data = oq.get();
 		print data
+
+		#Test updateDbTable
 		if(data[2] is None):
-			temp = {'rfid':data[1],'name':'Rishabh','rollno':'I dont know'}
+			temp = {'rfid':data[1],  'name':'Rishabh',  'rollno':'130121028'}
 			rfas.updateDbTable(temp)
+
+		# #Test updateLogTable
+		# logdata = {'timestamp':data[0].strftime("%Y-%m-%d %H:%M:%S"),  'rfid':'"'+str(data[1])+'"',  'name':'"'+data[2]+'"',  'rollno':'"130102051"'}
+		# rfas.updateLogTable(logdata)
+
 	except(KeyboardInterrupt, SystemExit):
 		print "KeyboardInterrupt in main. Exiting"
 		rfas.stopThread();
