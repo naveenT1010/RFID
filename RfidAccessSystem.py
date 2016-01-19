@@ -24,9 +24,17 @@ class RfidAccessSystem(object):
 		t=threading.Thread(target=self.getRowFromDB);
 		t.start();
 
+
+
+
+
 	#Function that sets running to false and stops the thread.
 	def stopThread(self):
 		self.running = False;
+
+
+
+
 
 	def getRowFromDB(self):
 		while(self.running):
@@ -73,6 +81,10 @@ class RfidAccessSystem(object):
 			self.cur.execute(insert_query)
 			self.db.commit()
 
+
+
+
+
 	#The data is a dict of column name : value
 	#The column name should be a string that matches one of the columns of dbTable
 	#The value should be of the correct datatype and format that you would use in a sql query.
@@ -89,8 +101,8 @@ class RfidAccessSystem(object):
 		update_query = update_query + ",".join(temp)
 		update_query = update_query + " WHERE rfid=" + rfid
 
-		#TEST CODE
-		print update_query
+		# #TEST CODE
+		# print update_query
 
 		#Cant use the same db and cursor objects as getRowFromDB
 		#Probably because its always running in a separate thread
@@ -99,23 +111,39 @@ class RfidAccessSystem(object):
 		tempcur.execute(update_query)
 		tempdb.commit()
 
+
+
+
+
 	#The data is a dict of column-name : value
 	#The column name should be a string that matches one of the columns of logTable
 	#The value should be of the correct datatype and format that you would use in a sql query.
 		#Thus, srtings should be enclosed by another pair of quotes
 		#Date and Time should be of correct format
-	# def updateLogTable(self,data):
-	# 	data = self.typeConversion(data)
+	def updateLogTable(self,data):
+		data = self.typeConversion(data)
 
-	# 	timestamp = data['timestamp']
-	# 	del data['timestamp']
+		timestamp = data['timestamp']
+		del data['timestamp']
 
-	# 	update_query = "UPDATE " + self.logTable + " SET "
-	# 	temp = [str(i[0])+"="+str(i[1]) for i in list(data.iteritems())]
-	# 	update_query = update_query + ",".join(temp)
-	# 	update_query = update_query + " WHERE timestamp=" + str(timestamp)
+		update_query = "UPDATE " + self.logTable + " SET "
+		temp = [str(i[0])+"="+str(i[1]) for i in list(data.iteritems())]
+		update_query = update_query + ",".join(temp)
+		update_query = update_query + " WHERE timestamp=" + str(timestamp)
 
-	# 	print update_query
+		# #TEST CODE
+		# print update_query
+
+		#Cant use the same db and cursor objects as getRowFromDB
+		#Probably because its always running in a separate thread
+		tempdb = MySQLdb.connect('localhost','pi','raspberry', self.sql_db)
+		tempcur = tempdb.cursor()
+		tempcur.execute(update_query)
+		tempdb.commit()
+
+
+
+
 
 	#The data is a dict of column-name : value
 	def typeConversion(self,data):
@@ -139,7 +167,7 @@ class RfidAccessSystem(object):
 				#Convert string back to date
 				temp2[i] = datetime.datetime.strptime(temp[i][0], "%Y-%m-%d %H:%M:%S.%f")
 				#Convert date to DATETIME format of mysql
-				temp2[i] = temp2[i].strftime("%Y-%m-%d %H:%M:%S")
+				temp2[i] = temp2[i].strftime('"%Y-%m-%d %H:%M:%S"')
 			else:
 				#The python type doesnt have support yet
 				print "The python type doesnt have support yet, contact developer"
