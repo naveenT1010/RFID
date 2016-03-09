@@ -5,13 +5,13 @@ import datetime
 import Queue
 import Constants
 
-class RfidAccessSystem(object):
+class RfidSystem(object):
 	def __init__(self, sql_db, dbTable, logTable, iq, oq):
-		print "INIT OF RfidAccessSystem."
+		print "INIT OF RfidSystem."
 		self.sql_db = sql_db #The sql database name
 		self.dbTable = dbTable #Table that stores the users of the system
 		self.logTable = logTable #Table that stores logs
-		self.db  = MySQLdb.connect('localhost','pi','raspberry', self.sql_db);
+		self.db  = MySQLdb.connect(Constants.sql_server,Constants.sql_user,Constants.sql_pass, self.sql_db);
 		self.cur = self.db.cursor();
 		self.iq  = iq;
 		self.oq  = oq;

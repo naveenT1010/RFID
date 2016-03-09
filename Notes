@@ -1,4 +1,11 @@
-Need to change the "RfidAccessSystem" class to "RfidSystem"
+Rfid System Documentation
+
+Table Rules
+The table "rfid_db" - should be of this format :
+    RFID(unsigned int) ROLLNO(varchar(255)) ...
+The table "rfid_logs" - should be of this format : 
+    TIMESTAMP(DATETIME) RFID(unsigned int) ROLLNO(varchar(255)) ...
+NOTE : The "..." specifies that variable length of columns can be added
 
 Rules for updateDbTable and updateLogTable
 The column names or the keys of the dictionary passed to updateDbTable and updateLogTable must be python strings
@@ -16,8 +23,4 @@ That is,
 	a numeric type of python	<--->	a numeric type of sql
 	string in python			<--->	TEXT in sql(or ENUM)
 	datetime in python			<--->	DATETIME in sql
-
-
-
-
 

@@ -1,4 +1,4 @@
-import RfidAccessSystem
+import RfidSystem
 import multiprocessing
 import RPi.GPIO as GPIO
 import MFRC522
@@ -9,7 +9,7 @@ import Constants
 #Init 
 iq = multiprocessing.Queue();
 oq = multiprocessing.Queue();
-rfas = RfidAccessSystem.RfidAccessSystem(Constants.sql_db,Constants.dbTable,Constants.logTable,iq,oq);
+rfas = RfidSystem.RfidSystem(Constants.sql_db,Constants.dbTable,Constants.logTable,iq,oq);
 
 #Run waitForCard in separate process.
 if __name__ == '__main__':

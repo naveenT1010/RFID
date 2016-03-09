@@ -1,0 +1,47 @@
+Follow these tutorials for more detailed instructions : 
+    https://learn.adafruit.com/series/learn-raspberry-pi
+
+Installing Raspian Jessie on Pi
+Expanding Filesystem
+Rasperry Pi Update and Upgrades
+Setting up SSH, I2C, SPI
+    Links followed before rfid worked on pi
+    https://www.raspberrypi.org/documentation/raspbian/updating.md 
+        Update and Upgrade RPI
+    https://github.com/Hexxeh/rpi-update
+        rpi-update may say things about time and ca-certificates, but it might be only a problem with proxy
+        Read Error Completely and make sure its not a proxy error
+    https://github.com/lthiery/SPI-Py
+    https://learn.adafruit.com/series/learn-raspberry-pi
+    https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/README.md
+    https://www.raspberrypi.org/forums/viewtopic.php?t=106313 
+        Note : Add "dtoverlay" line to "/boot/config.txt"
+        Explanation given here : https://github.com/raspberrypi/firmware/tree/master/boot/overlays
+Setting up Display
+    Follow link to set display resolution properly : 
+    http://stackoverflow.com/questions/22891235/how-to-change-screen-resolution-of-raspberry-pi
+    You can follow everything, except for screen resolution. Let that be 800*480
+Setiing up Wifi
+Setting Proxy Settings
+Install Rpi.GPIO by following adafruits tutorial
+
+Cloning and Installing lthiery/SPI-py from github
+Installing mysql on raspberry pi : 
+    https://www.linode.com/docs/databases/mysql/how-to-install-mysql-on-ubuntu-14-04
+Cloning, Installing and Testing mxgxw/MFRC522-Py from github
+Installing MySQLDB
+Finally, running krishraghuram/RFID
+
+Installing Chromium on Raspbian : 
+    http://conoroneill.net/running-the-latest-chromium-45-on-debian-jessie-on-your-raspberry-pi-2/
+Changing Default Browser to chromium :
+    https://wiki.debian.org/HOWTO/DefaultWebBrowser
+    Note : Change for all users, since we might run as sudo sometimes. 
+
+
+
+
+
+
+
+
