@@ -1,0 +1,12 @@
+body{
+	background-image: url("../img/congruent_outline.png");
+	padding-top: 10%;
+}
+h2, p{
+	color: white;
+}
+.btn{
+	margin-top: 5%;
+	width: 170px;
+	box-shadow: 0 2px 0 0 grey;
+}
