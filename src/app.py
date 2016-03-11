@@ -1,4 +1,5 @@
 import time
+import datetime
 import subprocess
 import RfidSystem
 import multiprocessing
@@ -18,11 +19,58 @@ if __name__ == '__main__':
 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
 	p.start()
 
-while (True):
-	# data_from_card = iq.get()
-	# current_data = {"timestamp":data_from_card[0], "rfid":data_from_card[1]}
-	rfas.getRowFromDB()
+subprocess.Popen(["google-chrome","--kiosk","index.html"])
+subprocess.Popen(["chromix-server"])
+time.sleep(5)
 
+db = MySQLdb.connect('localhost','root','Pass@321','rfidsys')
+cursor = db.cursor()
+
+meal = None
+
+while (True):
+	current_datetime = datetime.datetime.now()
+	data_from_card = oq.get()
+	current_data_list = {"timestamp":data_from_card[0], "rfid":data_from_card[1], "rollno":data_from_card[2], "name":data_from_card[3], "branch":data_from_card[4], "hostel":data_from_card[5], "state":data_from_card[6]}
+	#check if this is a new User
+	#for new user, entries other than rfid is empty
+	if rollno == None:
+		#show the registration form to new user
+		subprocess.call(["chromix","goto","PUT FORM URL HERE"])
+		while not "response" in str(subprocess.check_output(["chromix","url"])):
+			time.sleep(2)
+		#get data from the excel and put in the logtable
+	else:
+		#check if the mess is currently working and review can be given now
+		if 8 <= current_datetime.time().hour <= 10:
+			meal = 'B'
+		elif 12 <= current_datetime.time().hour <= 14:
+			meal = 'L'
+		elif 20 <= current_datetime.time().hour <= 22
+			meal = 'D'
+		else:
+			print "You cant give review at this time. Go Away.."
+			break
+
+		#check for last timestamp of the same rfid
+		check_query = "SELECT timestamp FROM mess WHERE rfid = " + current_data_list.rfid +" AND meal = " + meal + " ORDER BY timestamp DESC LIMIT 1"
+		cursor.execute(check_query)
+		previous_timestamp = cursor.fetchall()[0][0]
+
+		#check how much time has elapsed after user reviwed this meal
+		elapse_time = previous_timestamp - current_datetime
+
+		#check if the elapsed time afer the same user has reviewed is less than 2 hours
+		if divmod(elapse_time.total_seconds(),3600)[0] < 2
+		
+
+
+		#show the review form
+		subprocess.call(["chromix","goto","PUT LOG FORM LINK"])
+		while not "response" in str(subprocess.check_output(["chromix","url"])):
+			time.sleep(2)
+
+	
 
 subprocess.Popen(["google-chrome","--kiosk","index.html"])
 time.sleep(5)

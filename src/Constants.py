@@ -1,9 +1,9 @@
 #SQL CONSTANTS
 sql_server = "localhost"
-sql_user = "pi"
-sql_pass = ""
-sql_db = "IITG"
-dbTable = "students"
+sql_user = "root"#"pi"
+sql_pass = "Pass@321"#""
+sql_db = "rfidsys"#"IITG"
+dbTable = "rfid_db"#"students"
 logTable = "logs"
 
 #RFID System Constants

@@ -8,15 +8,15 @@ import Constants
 class RfidSystem(object):
 	def __init__(self, sql_db, dbTable, logTable, iq, oq):
 		print "INIT OF RfidSystem."
-		self.sql_db = sql_db #The sql database name
-		self.dbTable = dbTable #Table that stores the users of the system
-		self.logTable = logTable #Table that stores logs
+		self.sql_db = rfid_sys #The sql database name
+		self.dbTable = rfid_db #Table that stores the users of the system
+		self.logTable = app_mess #Table that stores logs
 		self.db  = MySQLdb.connect(Constants.sql_server,Constants.sql_user,Constants.sql_pass, self.sql_db);
 		self.cur = self.db.cursor();
 		self.iq  = iq;
 		self.oq  = oq;
 		#Below thread will run as long as this is true. User will set this to false to stop the thread.
-		self.running = True; 
+		self.running = True;
 		
 		#Start getRowFromDB in a new thread. 
 		#It will keep running as long the object of this class is alive, and so, 
@@ -47,7 +47,7 @@ class RfidSystem(object):
 			timestamp = temp[1]
 
 			#Try to get the row from dbTable
-			select_query = "SELECT * FROM "+ self.dbTable +" WHERE RFID= "+ str(rfid);
+			select_query = "SELECT * FROM "+ self.dbTable +" WHERE rfid= "+ str(rfid);
 			self.cur.execute(select_query)
 			data = self.cur.fetchall()
 
@@ -65,7 +65,7 @@ class RfidSystem(object):
 				self.cur.execute(insert_query)
 				self.db.commit();
 				#Select this entry
-				select_query = "SELECT * FROM "+ self.dbTable +" WHERE RFID= "+ str(rfid);
+				select_query = "SELECT * FROM "+ self.dbTable +" WHERE rfid= "+ str(rfid);
 				self.cur.execute(select_query)
 				data = self.cur.fetchall()
 				#Add timestamp
