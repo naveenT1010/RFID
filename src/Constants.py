@@ -1,10 +1,10 @@
 #SQL CONSTANTS
 sql_server = "localhost"
-sql_user = "root"#"pi"
-sql_pass = "Pass@321"#""
-sql_db = "rfidsys"#"IITG"
+sql_user = "pi"#"pi"
+sql_pass = "raspberry"#""
+sql_db = "rfid"#"IITG"
 dbTable = "rfid_db"#"students"
-logTable = "logs"
+logTable = "mess"
 
 #RFID System Constants
 timeOut = 5 #Time to wait for data from iq

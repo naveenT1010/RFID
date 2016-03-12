@@ -8,9 +8,9 @@ import Constants
 class RfidSystem(object):
 	def __init__(self, sql_db, dbTable, logTable, iq, oq):
 		print "INIT OF RfidSystem."
-		self.sql_db = rfid_sys #The sql database name
-		self.dbTable = rfid_db #Table that stores the users of the system
-		self.logTable = app_mess #Table that stores logs
+		self.sql_db = sql_db #The sql database name
+		self.dbTable = dbTable #Table that stores the users of the system
+		self.logTable = logTable #Table that stores logs
 		self.db  = MySQLdb.connect(Constants.sql_server,Constants.sql_user,Constants.sql_pass, self.sql_db);
 		self.cur = self.db.cursor();
 		self.iq  = iq;

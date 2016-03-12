@@ -1,4 +1,5 @@
 import time
+import MySQLdb
 import datetime
 import subprocess
 import RfidSystem
@@ -19,11 +20,13 @@ if __name__ == '__main__':
 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
 	p.start()
 
-subprocess.Popen(["google-chrome","--kiosk","index.html"])
+#for google chrome, use first command and for chromium, use the successor
+subprocess.Popen(["google-chrome","--kiosk","../user_pages/index.html"])
+subprocess.Popen(["chromium-browser","--kiosk","../user_pages/index.html"])
 subprocess.Popen(["chromix-server"])
 time.sleep(5)
 
-db = MySQLdb.connect('localhost','root','Pass@321','rfidsys')
+db = MySQLdb.connect('localhost','pi','raspberry','rfid')
 cursor = db.cursor()
 
 meal = None
@@ -31,12 +34,12 @@ meal = None
 while (True):
 	current_datetime = datetime.datetime.now()
 	data_from_card = oq.get()
-	current_data_list = {"timestamp":data_from_card[0], "rfid":data_from_card[1], "rollno":data_from_card[2], "name":data_from_card[3], "branch":data_from_card[4], "hostel":data_from_card[5], "state":data_from_card[6]}
+	current_data_list = {"timestamp":data_from_card[0], "rfid":data_from_card[1], "rollno":data_from_card[2], "name":data_from_card[3], "branch":data_from_card[4], "hostel":data_from_card[5]}
 	#check if this is a new User
 	#for new user, entries other than rfid is empty
 	if rollno == None:
 		#show the registration form to new user
-		subprocess.call(["chromix","goto","PUT FORM URL HERE"])
+		subprocess.call(["chromix","goto","http://google.com"])
 		while not "response" in str(subprocess.check_output(["chromix","url"])):
 			time.sleep(2)
 		#get data from the excel and put in the logtable
@@ -61,20 +64,17 @@ while (True):
 		elapse_time = previous_timestamp - current_datetime
 
 		#check if the elapsed time afer the same user has reviewed is less than 2 hours
-		if divmod(elapse_time.total_seconds(),3600)[0] < 2
+		if divmod(elapse_time.total_seconds(),3600)[0] < 2:
+			print "Sorry You have given one review for this meal. Go Away"
 		
+		else:
+			#show the review form
+			subprocess.call(["chromix","goto","PUT LOG FORM LINK"])
+			while not "response" in str(subprocess.check_output(["chromix","url"])):
+				time.sleep(2)
 
 
-		#show the review form
-		subprocess.call(["chromix","goto","PUT LOG FORM LINK"])
-		while not "response" in str(subprocess.check_output(["chromix","url"])):
-			time.sleep(2)
 
-	
-
-subprocess.Popen(["google-chrome","--kiosk","index.html"])
-time.sleep(5)
-subprocess.check_call(["google-chrome","--kiosk","http://google.com"])
 
 
 #-----JUNK BELOW-------
