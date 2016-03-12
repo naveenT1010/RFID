@@ -49,7 +49,7 @@ while (True):
 			meal = 'B'
 		elif 12 <= current_datetime.time().hour <= 14:
 			meal = 'L'
-		elif 20 <= current_datetime.time().hour <= 22
+		elif 20 <= current_datetime.time().hour <= 22:
 			meal = 'D'
 		else:
 			print "You cant give review at this time. Go Away.."
