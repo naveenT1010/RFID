@@ -20,24 +20,48 @@ if __name__ == '__main__':
 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
 	p.start()
 
+#function for checking or getting the authentication for response sheet access
+def getCredentials(OAUTH_CLIENT_ID,OAUTH_CLIENT_SECRET,OAUTH_SCOPE,OAUTH_REDIRECT_URI):
+	# Run through the OAuth flow and retrieve credentials
+    if(os.path.isfile(Constants.OAUTH_CREDENTIALS_FILE)): #If stored credentials is present
+        #Get the stored credentials
+        storage = Storage(Constants.OAUTH_CREDENTIALS_FILE)
+        credentials = storage.get()
+        #Refresh the credentials
+        http = httplib2.Http()
+        http = credentials.authorize(http)
+        credentials.refresh(http)
+    else: #If stored credentials is not present. This will occur only once.
+        #Create a flow
+        flow = OAuth2WebServerFlow(OAUTH_CLIENT_ID,OAUTH_CLIENT_SECRET,OAUTH_SCOPE,OAUTH_REDIRECT_URI)
+        #Get a url to follow for authentication
+        authorize_url = flow.step1_get_authorize_url()
+        print 'Go to the following link in your browser: ' + authorize_url + "\n"
+        #Ask for the confirmation code
+        code = raw_input('Enter verification code: ').strip()
+        #Get the credentials
+        credentials = flow.step2_exchange(code)
+        #Store the credentials, so that we dont have to do oauth manually from next time.
+        storage = Storage(Constants.OAUTH_CREDENTIALS_FILE)
+        storage.put(credentials)
+
 #for google chrome, use first command and for chromium, use the successor
 subprocess.Popen(["google-chrome","--kiosk","../user_pages/index.html"])
-subprocess.Popen(["chromium-browser","--kiosk","../user_pages/index.html"])
+# subprocess.Popen(["chromium-browser","--kiosk","../user_pages/index.html"])
 subprocess.Popen(["chromix-server"])
 time.sleep(5)
 
 db = MySQLdb.connect('localhost','pi','raspberry','rfid')
 cursor = db.cursor()
 
-meal = None
-
 while (True):
+	meal = None
+	data = oq.get()
 	current_datetime = datetime.datetime.now()
-	data_from_card = oq.get()
-	current_data_list = {"timestamp":data_from_card[0], "rfid":data_from_card[1], "rollno":data_from_card[2], "name":data_from_card[3], "branch":data_from_card[4], "hostel":data_from_card[5]}
+	current_data_dict = {"timestamp":data[0], "rfid":data[1], "rollno":data[2], "name":data[3], "branch":data[4], "hostel":data[5]}
 	#check if this is a new User
 	#for new user, entries other than rfid is empty
-	if rollno == None:
+	if current_data_dict['rollno'] == None:
 		#show the registration form to new user
 		subprocess.call(["chromix","goto","http://google.com"])
 		while not "response" in str(subprocess.check_output(["chromix","url"])):
@@ -56,7 +80,7 @@ while (True):
 			break
 
 		#check for last timestamp of the same rfid
-		check_query = "SELECT timestamp FROM mess WHERE rfid = " + current_data_list.rfid +" AND meal = " + meal + " ORDER BY timestamp DESC LIMIT 1"
+		check_query = "SELECT timestamp FROM mess WHERE rfid = " + current_data_dict.rfid +" AND meal = " + meal + " ORDER BY timestamp DESC LIMIT 1"
 		cursor.execute(check_query)
 		previous_timestamp = cursor.fetchall()[0][0]
 

@@ -1,0 +1,167 @@
+
+************************* RFID DOCUMENTATION *******************************
+Sit back, Take a cup of coffee and read on to dive into a world of extensive knowledge. 
+Let me help you with coffee ;)
+*This documentation has been made with utmmost dedicationa and care, and coffee too... :p*
+
+				____________1¶¶1___1¶¶1___1¶¶1____________________
+				____________1¶¶1___1¶¶1___1¶¶¶____________________
+				_____________¶¶¶____¶¶¶1___¶¶¶1___________________
+				______________¶¶¶¶___1¶¶¶___1¶¶¶__________________
+				_______________1¶¶¶1___¶¶¶1___¶¶¶¶________________
+				_________________1¶¶1____¶¶¶____¶¶¶_______________
+				___________________¶¶1____¶¶1____¶¶1______________
+				___________________¶¶¶____¶¶¶____¶¶¶______________
+				__________________1¶¶1___1¶¶1____¶¶1______________
+				_________________¶¶¶____¶¶¶1___1¶¶1_______________
+				________________11_____111_____11_________________
+				__________¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				1¶¶¶¶¶¶¶¶¶¶¶__¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				1¶¶¶¶¶¶¶¶¶¶¶__1¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				1¶¶_______¶¶__1¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				1¶¶_______¶¶__1¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				1¶¶_______¶¶__¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				1¶¶_______¶¶__1¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				_¶¶¶¶¶¶¶¶¶¶¶__¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				_¶¶¶¶¶¶¶¶¶¶¶__¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶________
+				__________¶¶___1¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶1________
+				__________1¶¶___¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶_________
+				____________¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶11__________
+				11_____________________________________________111
+				1¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶1
+				__¶¶111111111¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶111111111¶__
+
+
+==================================================================================
+How the frontend of the system was developed.
+==================================================================================
+
+Initially we made a flow chart of how things need to work. A rough note of it is like:
+ _____________________________________________________________________________
+|							 start Application								  |
+|									|										  |
+|								Scan Card									  |
+|									|										  |
+|							 New User or note                                 |
+|					________________|___________________                      |
+|				   |									|                     |
+|				  Yes									No                    |
+|				   |									|                     |
+|	Show Login form to the user and						|                     |
+|	Store the data filled after fetching				|                     |
+|	from the response sheet					Do Application Specific Stuff     |
+|											(example : App of Hostel MESS)    |
+|														|                     |
+|									Check if he has given Mess review already |
+|												__________|__________         |
+|											   |					 |        |
+|											   No 			    	Yes       |
+|											   |					 |        |
+|									Show the Review form           "GO AWAY"  |
+|_____________________________________________________________________________|
+	 
+for using chrome in our system, we first thought of using normal system commands of linux like:
+	$ google-chrome http://google.com
+but we needed an interface where user can do only the things that are relevant for the application like filling forms and submitting not closing tabs, changing urls etc etc
+
+for this we saw the kiosk mode in google chrome which was completely hidden and new for our knowledge. This mode allows you to  run chrome in complete fulscreen where you cant see tabs and buttons. To use this mode:
+	$ google-chrome --kiosk http://google.com
+
+now all of this had to be done by our app, open chrome, in kiosk mode, and then load pages and all. This seemed to be and easy task at first as we can use os.system module of python, but this has its own vulnerabilities so we shifted to a different module subprocess. 
+
+Furthur documentation of subprocess can be found at 
+	https://docs.python.org/2/library/subprocess.html
+Since we just used 3 main functions of this which are:
+	subprocess.call(args)
+	subprocess.check_output(args)
+	subprocess.Popen(args)
+
+we started with the first statement: subprocess.call(args)
+we it does is it Waits for command to complete, then return the returncode attribute. But the problem was that untill the command was that due to proxy request of chrome, it doesnt get the end the command completely and hence it gets stuck, we cant give a new terminal command then.
+
+We then tried the check_output but the same problem existed there also. Although both of these were running well when we had one chrome instance running, i.e if the chrome was already running, it doesnt ask for that proxy request on each command and call and check_output were completing seamlessly. But this is not a good practics to use such jugaads.
+
+Then we cane to subprocess.Popen(args). It Execute a child program in a new process, i.e it can run many terminal processes simulataneouly so we dont need to worry about stopping a command and then running second.
+The format is like
+
+************************* in python script *******************************
+	subprocess.Popen(["google-chrome","--kiosk","http://google.com"])
+	time.sleep(3)
+	subprocess.Popen(["google-chrome","http://fb.com"])
+	time.sleep(3)
+	subprocess.Popen(["google-chrome","http://github.com"])
+**************************************************************************
+and above commands run in order. 
+
+But then a new problem takes its head up. We cant close tabs, change tabs or redirect to a new url in same tab from terminal. If the application has to work 24/7 then it would make hundreds of tabs for forms and welcom screens. It would create a blunder and eventually would made the system crash.
+
+After alot of head scrating, searching and sleeping we finally got a system specifically designed for command line control of google chrome. It was chromix.
+
+===============================================================================
+Chromix
+===============================================================================
+Documentation at : http://chromix.smblott.org/
+chromix is a command-line and scripting utility for controlling Google chrome. It can be used, amongst other things, to create, switch, focus, reload and remove tabs.
+
+chromix involves three components:
+
+1 - A chrome extension known as chromi.
+	Chromi is packaged separately. It is available either at the chrome web store or from GitHub.
+
+2 - A server: chromix-server.
+
+3 - A client: chromix. 
+	This is the chromix command-line and scripting utility.
+
+Here is how these components work
+
+************************************IMP*************************************
+You need to bypass proxy to localhost inorder to allow chromi to connect to the server.
+****************************************************************************
+   ______________ 			_____________________    		 _________
+  |    		     |		   | 				     |	        |		  |
+  |  chrom i in  | 		   | ws://localhost:7441 |	        | chromix |
+  | google chrome|---------|   chromix server    |----------|  client |
+  |______________|		   |_____________________|			|_________|
+
+chromi extension connects to the server at above address using webSocket connections and listens over there. We at the client chromix send the commands to this server to which chromi responds and does the tasks.
+
+To check if the connection is establised:
+	$ chromix ping
+then the server will show "pong", Although you can see the heartbeat sent by the extension to the chromix server as :
+
+******************** terminal output of chromix-server********************
+	chromi ? info connected
+	chromi ? info heartbeat 1
+**************************************************************************
+
+Now some general chromix commands:
+	$ chromix load https://github.com/
+	$ chromix with other close
+	$ chromix with http://www.bbc.co.uk/news/ focus
+	$ chromix with current goto http://www.bbc.co.uk/news/
+	$ chromix url
+
+And now we can use subprocess.Popen with chromix to fully control the chrome.
+
+
+====================================================================================
+Creating google API credentials and authentication process
+====================================================================================
+
+Our system involves extensive use of google forms and their response sheets. To access the responses, we need to authenticate aur request. For this some credentials are required which are given when we need to access the sheets.
+
+To create credentials file:
+1. Go to Google Developers Console.
+2. In the side bar, click on API manager.
+3. Click on credentials on left side.
+4. You may need to create a project, just do it, it doesnt matter anyway.
+5. Then click on credentials. You be presented a small box with Create Credentials button in the bottom.
+6. Clicking on this shows 3 Options:
+	(i)   API Key
+	(ii)  OAuth Client ID
+	(iii) Service Account Key
+7. Select 'OAuth Client ID' from above and It'll ask to configure the consent screen by giving a project name visible to others,give a project name in consent screen and save it.
+8. Now select the 'Web Application' from Application type and the you'll be presented with your secret credentials.
+9. You can download the JSON version of this file. It'll have your CLIENT ID, CLIENT SECRET, OAUTH SCOPE, REDIRECT URI.
+10. For applications like this (RFID Project) which aren't any web based apps, OAUTH SCOPE is like a constant value and doesnt change.
