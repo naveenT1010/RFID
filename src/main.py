@@ -114,7 +114,7 @@ def getRecordFromSheet(sheet_uri, form_display_time):
 
     #Find the record with timestamp after form_display_time
     record=None
-    while(record==None)
+    while(record==None):
         no_of_records = 0
         for i in all_records:
             #Compare i['Timestamp'] and form_display_time

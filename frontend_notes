@@ -162,6 +162,6 @@ To create credentials file:
 	(ii)  OAuth Client ID
 	(iii) Service Account Key
 7. Select 'OAuth Client ID' from above and It'll ask to configure the consent screen by giving a project name visible to others,give a project name in consent screen and save it.
-8. Now select the 'Web Application' from Application type and the you'll be presented with your secret credentials.
+8. Now select the 'other' from Application type and the you'll be presented with your secret credentials.
 9. You can download the JSON version of this file. It'll have your CLIENT ID, CLIENT SECRET, OAUTH SCOPE, REDIRECT URI.
 10. For applications like this (RFID Project) which aren't any web based apps, OAUTH SCOPE is like a constant value and doesnt change.
