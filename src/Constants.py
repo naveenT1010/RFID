@@ -12,19 +12,20 @@ timeSleep = 5 #Time that the system sleeps after reading a card
 
 #OAUTH Constants
 #raghu
-# OAUTH_CLIENT_ID ='647866863318-8gdadgl7js9d5o0bbrkcds7as6s420p5.apps.googleusercontent.com' # '943930483169-j9bnqkvhq385c7ph7i82sjh6a4c8l2q1.apps.googleusercontent.com'
+# OAUTH_CLIENT_ID ='647866863318-8gdadgl7js9d5o0bbrkcds7as6s420p5.apps.googleusercontent.com'
 #naveen
 OAUTH_CLIENT_ID ='943930483169-j9bnqkvhq385c7ph7i82sjh6a4c8l2q1.apps.googleusercontent.com'
 #raghu
 # OAUTH_CLIENT_SECRET = 'KFKZBajk5KA7pUQ_cTduz6z6' #'t-tn-1L1waC8bamHCyRa0kQq'
 #naveen
 OAUTH_CLIENT_SECRET = 't-tn-1L1waC8bamHCyRa0kQq'
+
 OAUTH_SCOPE = 'https://spreadsheets.google.com/feeds'
 OAUTH_REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 OAUTH_CREDENTIALS_FILE = 'credentials_file'
 
 #FORM AND RESPONSES
-# REGISTRATION_FORM_URI = http://goo.gl/forms/rrLQGy3rze
-# REGISTRATION_RESPONSES_URI = https://docs.google.com/spreadsheets/d/1888PSs7a69coX4mdhZOTiTLWPCov8jCohqStkGXanU8/edit?usp=sharing
-# LOG_FORM_URI = 
-# LOG_FORM_RESPONSES = 
+REGISTRATION_FORM_URL = 'http://goo.gl/forms/rrLQGy3rze'
+REGISTRATION_RESPONSES_SHEET = 'RFID Responses'
+LOG_FORM_URI = 'http://goo.gl/forms/Vt4ehx26zv'
+LOG_RESPONSES_NAME = 'MESS Responses'

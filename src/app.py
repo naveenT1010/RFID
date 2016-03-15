@@ -11,10 +11,7 @@ import Reader
 import Constants
 import os
 from oauth2client.client import OAuth2WebServerFlow
-# from oauth2client.client import SignedJwtAssertionCredentials
-from oauth2client.file import Storage  
-# from apiclient.http import MediaFileUpload
-# from apiclient.discovery import build
+from oauth2client.file import Storage
 import httplib2
 import pprint
 import gspread
@@ -29,8 +26,6 @@ rfas = RfidSystem.RfidSystem(Constants.sql_db,Constants.dbTable,Constants.logTab
 if __name__ == '__main__':
 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
 	p.start()
-	# getRecord(getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI))
-
 
 #function for checking or getting the authentication for response sheet access
 def getCredentials(OAUTH_CLIENT_ID,OAUTH_CLIENT_SECRET,OAUTH_SCOPE,OAUTH_REDIRECT_URI):
@@ -60,18 +55,13 @@ def getCredentials(OAUTH_CLIENT_ID,OAUTH_CLIENT_SECRET,OAUTH_SCOPE,OAUTH_REDIREC
 		storage.put(credentials)
 		return credentials
 
-	# json_key = json.load(open('My Project 1-eba977c52080.json'))
-	# scope = ['https://spreadsheets.google.com/feeds']
-	# credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
-	# return credentials
-
-def getRecord(credentials, form_filling_time):
+def getRecord(sheet_name, credentials, form_filling_time):
 	record=None
 	while(record==None):
 		#Start an app
 		gc = gspread.authorize(credentials)
 		#Open a worksheet from spreadsheet with one shot
-		wks = gc.open('RFID Responses').sheet1
+		wks = gc.open(sheet_name).sheet1
 		#Find the record with timestamp after form_filling_time
 		#Get all the records
 		all_records = wks.get_all_records()
@@ -80,10 +70,10 @@ def getRecord(credentials, form_filling_time):
 		for i in all_records:
 			#Compare i['Timestamp'] and form_filling_time
 			#If i is after form_filling_time, record=i
-			if (parser.parse(i['Timestamp']) > form_filling_time ) : #If i['Timestamp'] is more recent
+			if (parser.parse(i['timestamp']) > form_filling_time ) : #If i['Timestamp'] is more recent
 				record = i;
 				no_of_records = no_of_records+1
-				print record['Timestamp']
+				print record['timestamp']
 		if(no_of_records>1):
 			print "Error : In main.getRecord, Multiple Entries after form_filling_time"
 
@@ -95,7 +85,8 @@ def getRecord(credentials, form_filling_time):
 subprocess.Popen(["chromix-server"])
 time.sleep(5)
 
-db = MySQLdb.connect('localhost','pi','raspberry','rfid')
+db = MySQLdb.connect(Constants.sql_server,Constants.sql_user,Constants.sql_pass,Constants.sql_db)
+# db = MySQLdb.connect('localhost','pi','raspberry','rfid')
 cursor = db.cursor()
 
 while (True):
@@ -106,7 +97,7 @@ while (True):
 	#for new user, entries other than rfid is empty
 	if current_data_dict['rollno'] == None:
 		#show the registration form to new user
-		subprocess.call(["chromix","goto","http://goo.gl/forms/rrLQGy3rze"])
+		subprocess.call(["chromix","goto",Constants.REGISTRATION_FORM_URL])
 
 		#waiting for user to fill the form. when filled this loop will break.
 		while not "Response" in str(subprocess.check_output(["chromix","url"])):
@@ -117,7 +108,7 @@ while (True):
 		#get credentials for accessing the response sheet
 		credentials_for_access = getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI)
 		#get data from the excel and put in the logtable
-		sheet_record = getRecord(credentials_for_access, form_submission_time)
+		sheet_record = getRecord(Constants.REGISTRATION_RESPONSES_SHEET, credentials_for_access, form_submission_time)
 		#put this data into rfid_db in SQL
 		rfas.updateDbTable(sheet_record)
 
