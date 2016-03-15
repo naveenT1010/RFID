@@ -10,6 +10,7 @@ import signal
 import Reader
 import Constants
 import os
+import Queue
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 import httplib2
@@ -61,7 +62,7 @@ def getRecord(sheet_name, credentials, form_filling_time):
 		#Start an app
 		gc = gspread.authorize(credentials)
 		#Open a worksheet from spreadsheet with one shot
-		wks = gc.open(sheet_name).sheet1
+		wks = gc.open(sheet_name).get_worksheet(0)
 		#Find the record with timestamp after form_filling_time
 		#Get all the records
 		all_records = wks.get_all_records()
@@ -70,6 +71,7 @@ def getRecord(sheet_name, credentials, form_filling_time):
 		for i in all_records:
 			#Compare i['Timestamp'] and form_filling_time
 			#If i is after form_filling_time, record=i
+			print "Checking for latest entry. Form filled at " + str(form_filling_time)
 			if (parser.parse(i['timestamp']) > form_filling_time ) : #If i['Timestamp'] is more recent
 				record = i;
 				no_of_records = no_of_records+1
@@ -78,6 +80,18 @@ def getRecord(sheet_name, credentials, form_filling_time):
 			print "Error : In main.getRecord, Multiple Entries after form_filling_time"
 
 	return record;
+
+def getLatestRecord(sheet_name, credentials):	
+	time.sleep(5)
+	#Start an app
+	gc = gspread.authorize(credentials)
+	#Open a worksheet from spreadsheet with one shot
+	wks = gc.open(sheet_name).get_worksheet(0)
+	#Find the record with timestamp after form_filling_time
+	#Get all the records
+	all_records = wks.get_all_records()
+	print "\nThe last record is : " + str(all_records[-1])
+	return all_records[-1];
 
 #for google chrome, use first command and for chromium, use the successor
 # subprocess.Popen(["google-chrome","--kiosk","../user_pages/index.html"])
@@ -91,7 +105,13 @@ cursor = db.cursor()
 
 while (True):
 	meal = None
-	data = oq.get()
+	print "Please use the RFID Card"
+
+	try:
+		data = oq.get(True, Constants.timeOut)
+	except Queue.Empty:
+		continue
+
 	current_data_dict = {"timestamp":data[0], "rfid":data[1], "rollno":data[2], "name":data[3], "branch":data[4], "hostel":data[5]}
 	#check if this is a new User
 	#for new user, entries other than rfid is empty
@@ -108,9 +128,13 @@ while (True):
 		#get credentials for accessing the response sheet
 		credentials_for_access = getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI)
 		#get data from the excel and put in the logtable
-		sheet_record = getRecord(Constants.REGISTRATION_RESPONSES_SHEET, credentials_for_access, form_submission_time)
+		sheet_record = getLatestRecord(Constants.REGISTRATION_RESPONSE_SHEET, credentials_for_access)
+		#put rfid data in the sheet dict and remove timestamp from sheet_record
+		sheet_record['rfid'] = current_data_dict['rfid']
+		del sheet_record['timestamp']
 		#put this data into rfid_db in SQL
 		rfas.updateDbTable(sheet_record)
+		print "\nRegister Ho Gya... :D ... Go Away"
 
 	else:
 		current_datetime = datetime.datetime.now()
@@ -119,29 +143,40 @@ while (True):
 			meal = 'B'
 		elif 12 <= current_datetime.time().hour <= 14:
 			meal = 'L'
-		elif 20 <= current_datetime.time().hour <= 22:
+		elif 20 <= current_datetime.time().hour <= 24:
 			meal = 'D'
 		else:
 			print "You cant give review at this time. Go Away.."
 			break
 
 		#check for last timestamp of the same rfid
-		check_query = "SELECT timestamp FROM mess WHERE rfid = " + current_data_dict.rfid +" AND meal = " + meal + " ORDER BY timestamp DESC LIMIT 1"
+		check_query = "SELECT timestamp FROM mess WHERE rfid = " + str(current_data_dict['rfid']) +' AND meal = "' +meal + '" ORDER BY timestamp DESC LIMIT 1'
 		cursor.execute(check_query)
-		previous_timestamp = cursor.fetchall()[0][0]
+		previous_timestamp = cursor.fetchall()
+		print previous_timestamp
 
-		#check how much time has elapsed after user reviwed this meal
-		elapse_time = previous_timestamp - current_datetime
-
-		#check if the elapsed time afer the same user has reviewed is less than 2 hours
-		if divmod(elapse_time.total_seconds(),3600)[0] < 2:
-			print "Sorry You have given one review for this meal. Go Away"
+		if not ( type(previous_timestamp) == tuple and len(previous_timestamp) == 0 ):
+			#He has already given review for this meal. 
+			print "You have already done your review. Please Go Away"
 		
 		else:
+			print "in line 157"
 			#show the review form
-			subprocess.call(["chromix","goto","PUT LOG FORM LINK"])
-			while not "response" in str(subprocess.check_output(["chromix","url"])):
-				time.sleep(2)
+			subprocess.call(["chromix","goto",Constants.LOG_FORM_URL])
+			#check if he filled the review form
+			while not "Response" in str(subprocess.check_output(["chromix","url"])):
+				time.sleep(1)
+			
+			credentials_for_access = getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI)
+			review_data = getLatestRecord(Constants.LOG_RESPONSE_SHEET,credentials_for_access)
+			review_data['timestamp'] = current_data_dict['timestamp']
+			review_data['rollno'] = current_data_dict['rollno']
+			review_data['meal'] = meal
+			review_data['rfid'] = current_data_dict['rfid']
+			
+			# #update the log table
+			rfas.updateLogTable(review_data)
+			print "Your Review has been logged... Do come again.. :)"
 
 
 

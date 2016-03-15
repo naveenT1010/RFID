@@ -26,6 +26,6 @@ OAUTH_CREDENTIALS_FILE = 'credentials_file'
 
 #FORM AND RESPONSES
 REGISTRATION_FORM_URL = 'http://goo.gl/forms/rrLQGy3rze'
-REGISTRATION_RESPONSES_SHEET = 'RFID Responses'
-LOG_FORM_URI = 'http://goo.gl/forms/Vt4ehx26zv'
-LOG_RESPONSES_NAME = 'MESS Responses'
+REGISTRATION_RESPONSE_SHEET = 'RFID Responses'
+LOG_FORM_URL = 'http://goo.gl/forms/Vt4ehx26zv'
+LOG_RESPONSE_SHEET = 'MESS Responses'
