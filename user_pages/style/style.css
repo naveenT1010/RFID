@@ -10,3 +10,11 @@ h2, p{
 	width: 170px;
 	box-shadow: 0 2px 0 0 grey;
 }
+img{
+	position: relative;
+	left: 43.5%;
+	display: block;
+}
+.success{
+	color: cyan;
+}
