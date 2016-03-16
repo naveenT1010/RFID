@@ -157,7 +157,7 @@ while (continue_reading):
 		
 		#Put this data into rfid_db in SQL
 		rfas.updateDbTable(sheet_record)
-
+		db.commit()
 		#Show the "Registration Successful" webpage
 		subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/reg_success.html"])		
 		print "\nRegister Ho Gya... :D "
@@ -216,7 +216,7 @@ while (continue_reading):
 			
 			#Update the log table
 			rfas.updateLogTable(review_data)
-
+			db.commit()
 			#Show the "Your review is appreciated" webpage
 			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/log_success.html"])
 			print "Your Review has been logged... Do come again.. :)"
