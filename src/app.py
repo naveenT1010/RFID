@@ -17,16 +17,24 @@ import httplib2
 import pprint
 import gspread
 from dateutil import parser
+import server.py
 
 #Init 
 iq = multiprocessing.Queue();
 oq = multiprocessing.Queue();
 rfas = RfidSystem.RfidSystem(Constants.sql_db,Constants.dbTable,Constants.logTable,iq,oq);
 
+#Putting the server online
+Handler = ServerHandler
+httpd = SocketServer.TCPServer(("", PORT), Handler)
+print "Serving at: http://%(interface)s:%(port)s" % dict(interface=I or "localhost", port=PORT)
+httpd.serve_forever()
+
 #Run waitForCard in separate process.
-if __name__ == '__main__':
-	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
-	p.start()
+reader = Reader.Reader(iq)
+# if __name__ == '__main__':
+# 	p = multiprocessing.Process(target=Reader.waitForCard,args=(iq,))
+# 	p.start()
 
 #function for checking or getting the authentication for response sheet access
 def getCredentials(OAUTH_CLIENT_ID,OAUTH_CLIENT_SECRET,OAUTH_SCOPE,OAUTH_REDIRECT_URI):
@@ -99,19 +107,6 @@ def getLatestRecord(sheet_name, credentials):
             time.sleep(5)
     return record
 
-
-#Make SIGINT Work
-continue_reading = True #Boolean that changes to false when sigint is captured.
-
-#Capture SIGINT for cleanup when the script is aborted.
-def end_read(signal,frame):
-	global continue_reading
-	print "Ctrl+C captured, ending read."
-	continue_reading = False
-
-# Hook the SIGINT
-signal.signal(signal.SIGINT, end_read)
-
 #Use first command for chrome, second for chromium
 #subprocess.Popen(["google-chrome","--kiosk","../user_pages/index.html"])
 subprocess.Popen(["chromium-browser","--kiosk","../user_pages/index.html"])
@@ -124,101 +119,109 @@ time.sleep(10)
 db = MySQLdb.connect(Constants.sql_server,Constants.sql_user,Constants.sql_pass,Constants.sql_db)
 cursor = db.cursor()
 
-subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/index.html"])
-while (continue_reading):
-	#Show the "Welcome" webpage
-	print "Please use the RFID Card"
-
+subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/waiting_page.html"])
+while (True):
 	try:
-		data = oq.get(True, Constants.timeOut)
-	except Queue.Empty:
-		continue
+		#Show the "Welcome" webpage
+		print "Please use the RFID Card"
 
-	current_data_dict = {"timestamp":data[0], "rfid":data[1], "rollno":data[2], "name":data[3], "branch":data[4], "hostel":data[5]}
+		try:
+			reader.resume_read()
+			data = oq.get(True, Constants.timeOut)
+			reader.pause_read()
+		except Queue.Empty:
+			continue
 
-	#Check if this is a new user
-	if current_data_dict['rollno'] == None: #If new user
-		#Show the registration form to new user
-		subprocess.call(["chromix","goto",Constants.REGISTRATION_FORM_URL])
+		current_data_dict = {"timestamp":data[0], "rfid":data[1], "rollno":data[2], "name":data[3], "branch":data[4], "hostel":data[5]}
 
-		#Waiting for user to fill the form. When filled this loop will break.
-		while not "Response" in str(subprocess.check_output(["chromix","url"])):
-			time.sleep(5)
-		subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/processing.html"])		
-
-		#Get credentials(using OAuth) for accessing the response sheet
-		credentials_for_access = getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI)
-		#Get data from the google sheet
-		sheet_record = getLatestRecord(Constants.REGISTRATION_RESPONSE_SHEET, credentials_for_access)
-		
-		#Put rfid data in the sheet dict and remove timestamp from sheet_record
-		sheet_record['rfid'] = current_data_dict['rfid']
-		del sheet_record['timestamp']
-		
-		#Put this data into rfid_db in SQL
-		rfas.updateDbTable(sheet_record)
-		db.commit()
-		#Show the "Registration Successful" webpage
-		subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/reg_success.html"])		
-		print "\nRegister Ho Gya... :D "
-		time.sleep(5)
-		subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/index.html"])
-
-	else:
-		meal = 'B'
-		# current_datetime = datetime.datetime.now()
-		# #check if the mess is currently working and review can be given now
-		# if 8 <= current_datetime.time().hour <= 10:
-		# 	meal = 'B'
-		# elif 12 <= current_datetime.time().hour <= 14:
-		# 	meal = 'L'
-		# elif 20 <= current_datetime.time().hour <= 24:
-		# 	meal = 'D'
-		# else:
-		# 	subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/mess_closed.html"])
-		# 	break
-
-		#Check for last timestamp of the same rfid
-		check_query = "SELECT timestamp FROM mess WHERE rfid = " + str(current_data_dict['rfid']) +' AND meal = "' +meal + '" ORDER BY timestamp DESC LIMIT 1'
-		cursor.execute(check_query)
-		previous_timestamp = cursor.fetchall()
-		print previous_timestamp
-
-		if not ( type(previous_timestamp) == tuple and len(previous_timestamp) == 0 ):
-			#Show the "You have already given your review for this meal. Please come back later" webpage
-			print "You have already done your review. Please Go Away"
-			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/duplicate_review.html"])	
-			time.sleep(5)
-			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/index.html"])
-
-		
-		else: #Else, if he is a existing user
-			#Show the log form
-			subprocess.call(["chromix","goto",Constants.LOG_FORM_URL])
-
-			#Check if he filled the review form
-			while not "Response" in str(subprocess.check_output(["chromix","url"])):
-				time.sleep(5)
-			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/processing.html"])	
+		#Check if this is a new user
+		if current_data_dict['rollno'] == None: #If new user
+			#Show the registration form to new user
+			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/user_reg.html"])
+			form_response = subprocess.check_output(["chromix","url"])
 			
+			#Waiting for user to fill the form. When filled this loop will break.
+			while not "reg" in str(subprocess.check_output(["chromix","url"])):
+				time.sleep(5)
+			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/processing.html"])		
+
 			#Get credentials(using OAuth) for accessing the response sheet
 			credentials_for_access = getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI)
-			
 			#Get data from the google sheet
-			review_data = getLatestRecord(Constants.LOG_RESPONSE_SHEET,credentials_for_access)
-			print review_data
-			print "hello"
-			#Modify review_data according to needs before updating logtable
-			review_data['timestamp'] = current_data_dict['timestamp']
-			review_data['rollno'] = current_data_dict['rollno']
-			review_data['meal'] = meal
-			review_data['rfid'] = current_data_dict['rfid']
+			sheet_record = getLatestRecord(Constants.REGISTRATION_RESPONSE_SHEET, credentials_for_access)
 			
-			#Update the log table
-			rfas.updateLogTable(review_data)
+			#Put rfid data in the sheet dict and remove timestamp from sheet_record
+			sheet_record['rfid'] = current_data_dict['rfid']
+			del sheet_record['timestamp']
+			
+			#Put this data into rfid_db in SQL
+			rfas.updateDbTable(sheet_record)
 			db.commit()
-			#Show the "Your review is appreciated" webpage
-			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/log_success.html"])
-			print "Your Review has been logged... Do come again.. :)"
+			#Show the "Registration Successful" webpage
+			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/reg_success.html"])		
+			print "\nRegister Ho Gya... :D "
 			time.sleep(5)
 			subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/index.html"])
+
+		else:
+			meal = 'B'
+			# current_datetime = datetime.datetime.now()
+			# #check if the mess is currently working and review can be given now
+			# if 8 <= current_datetime.time().hour <= 10:
+			# 	meal = 'B'
+			# elif 12 <= current_datetime.time().hour <= 14:
+			# 	meal = 'L'
+			# elif 20 <= current_datetime.time().hour <= 24:
+			# 	meal = 'D'
+			# else:
+			# 	subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/mess_closed.html"])
+			# 	break
+
+			#Check for last timestamp of the same rfid
+			check_query = "SELECT timestamp FROM mess WHERE rfid = " + str(current_data_dict['rfid']) +' AND meal = "' +meal + '" ORDER BY timestamp DESC LIMIT 1'
+			cursor.execute(check_query)
+			previous_timestamp = cursor.fetchall()
+			print previous_timestamp
+
+			if not ( type(previous_timestamp) == tuple and len(previous_timestamp) == 0 ):
+				#Show the "You have already given your review for this meal. Please come back later" webpage
+				print "You have already done your review. Please Go Away"
+				subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/duplicate_review.html"])	
+				time.sleep(5)
+				subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/index.html"])
+
+			
+			else: #Else, if he is a existing user
+				#Show the log form
+				subprocess.call(["chromix","goto",Constants.LOG_FORM_URL])
+
+				#Check if he filled the review form
+				while not "Response" in str(subprocess.check_output(["chromix","url"])):
+					time.sleep(5)
+				subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/processing.html"])	
+				
+				#Get credentials(using OAuth) for accessing the response sheet
+				credentials_for_access = getCredentials(Constants.OAUTH_CLIENT_ID, Constants.OAUTH_CLIENT_SECRET, Constants.OAUTH_SCOPE, Constants.OAUTH_REDIRECT_URI)
+				
+				#Get data from the google sheet
+				review_data = getLatestRecord(Constants.LOG_RESPONSE_SHEET,credentials_for_access)
+
+				#Modify review_data according to needs before updating logtable
+				review_data['timestamp'] = current_data_dict['timestamp']
+				review_data['rollno'] = current_data_dict['rollno']
+				review_data['meal'] = meal
+				review_data['rfid'] = current_data_dict['rfid']
+				
+				#Update the log table
+				rfas.updateLogTable(review_data)
+				db.commit()
+				#Show the "Your review is appreciated" webpage
+				subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/log_success.html"])
+				print "Your Review has been logged... Do come again.. :)"
+				time.sleep(5)
+				subprocess.call(["chromix","goto","file:///home/pi/Documents/RFID/user_pages/index.html"])
+	except(KeyboardInterrupt, SystemExit):
+		print "KeyboardInterrupt in main. Exiting"
+		rfas.stopThread();
+		reader.stopThread();
+		break;				

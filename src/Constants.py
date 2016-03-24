@@ -7,8 +7,8 @@ dbTable = "rfid_db"#"students"
 logTable = "mess"
 
 #RFID System Constants
-timeOut = 5 #Time to wait for data from iq
-timeSleep = 5 #Time that the system sleeps after reading a card
+timeOut = 5 #Time to wait for data from iq in RfidSystem.
+timeSleep = 5 #Time that the system sleeps after reading a card, to avoid multiple reads.
 
 #OAUTH Constants
 #raghu

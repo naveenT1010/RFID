@@ -1,0 +1,16 @@
+body{
+	background-image: url("../img/congruent_outline.png");
+}
+.form-container{
+	background-color: #fff;
+	width: 50%;
+	margin-left: 25%;
+	margin-top: 5%;
+	border-top: 6px solid red;
+}
+h2{
+	color: white
+}
+input[type=submit]{
+	margin-left: 33%;
+}

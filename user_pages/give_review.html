@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Register</title>
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
+
+	<link rel="stylesheet" href="style/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="style/bootstrap-material-design.min.css">
+  	<link rel="stylesheet" type="text/css" href="style/ripples.min.css">
+	<link rel="stylesheet" href="style/style_reg.css">
+	<script src="js/jquery-1.11.3.js"></script>	
+</head>
+<body>
+	<h2 class="text-center">Rate the Exhibit you liked the most.</h2>
+		<div class="form-container center col-md-8">
+			<h3 class="text-center">Best Exhibit Selection</h3>
+			
+			<form name="rating form" action="/log_success.html" method="POST" class="form-horizontal">
+		  	<fieldset>
+		    <label class="col-md-2 control-label">Exhibits</label>
+		    <div class="col-md-10">
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="CMIC" id="optionsRadios2" value="1">
+		            Catch Me if You Can
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="VM" id="optionsRadios3" value="1">
+		            Virtual Mouse
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="Labyrinth" id="optionsRadios4" value="1">
+		            labyrinth
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="RoboticBall" id="optionsRadios5" value="1">
+		            Robotic Ball
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="MiniBots" id="optionsRadios6" value="1">
+		            Mini Bots
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="WhiteBoard" id="optionsRadios7" value="1">
+		            White Board
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="AIR" id="optionsRadios8" value="1">
+		            AIR
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="MiniAIR" id="optionsRadios9" value="1">
+		            Mini AIR
+		          </label>
+		        </div>
+		        <div class="radio radio-primary">
+		          <label>
+		            <input type="radio" name="SLAER" id="optionsRadios10" value="1">
+		            SLAER
+		          </label>
+		        </div>
+	        </div>
+	        <input type="submit" class="btn btn-raised btn-success"></input>
+		    <input type="reset" class="btn btn-raised btn-danger"></input>
+		  </fieldset>
+		</form>
+	</div>
+	<script src="js/bootstrap.min.js"></script>	
+	<script src="js/material.min.js"></script>	
+	<script src="js/ripples.min.js"></script>	
+	<script>
+  		$.material.init();
+  		$(function(){
+		    $('input[type="radio"]').click(function(){
+		        var $radio = $(this);
+
+		        // if this was previously checked
+		        if ($radio.data('waschecked') == true)
+		        {
+		            $radio.prop('checked', false);
+		            $radio.data('waschecked', false);
+		        }
+		        else
+		            $radio.data('waschecked', true);
+
+		        // remove was checked from other radios
+		        $radio.siblings('input[name="rad"]').data('waschecked', false);
+			    });
+		});
+	</script>
+</body>
+</html>

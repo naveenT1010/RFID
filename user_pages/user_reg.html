@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Register</title>
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+  	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/icon?family=Material+Icons">
+
+	<link rel="stylesheet" href="style/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="style/bootstrap-material-design.min.css">
+  	<link rel="stylesheet" type="text/css" href="style/ripples.min.css">
+	<link rel="stylesheet" href="style/style_reg.css">
+	<script src="js/jquery-1.11.3.js"></script>	
+</head>
+<body>
+	<h2 class="text-center">Please register the following form to Register.</h2>
+	<div class="form-container center col-md-8">
+		<h3 class="text-center">RFID New User</h3>
+		
+		<form name="register form" action="/reg_success.html" method="POST" class="form-horizontal">
+	  	<fieldset>
+		    <div class="form-group">
+		      <label for="name" class="col-md-2 control-label">Name</label>
+
+		      <div class="col-md-10">
+		        <input type="text" name="name" class="form-control" id="name" placeholder="John Doe">
+		      </div>
+		    </div>
+
+		    <div class="form-group">
+		      <label for="rollno" class="col-md-2 control-label">Roll NO</label>
+
+		      <div class="col-md-10">
+		        <input type="number" name="rollno"  class="form-control" id="rollno" placeholder="140103085">
+		      </div>
+		    </div>
+
+		    <div class="form-group">
+		      <label for="branch" class="col-md-2 control-label">Branch</label>
+
+		      <div class="col-md-10">
+		        <input type="text" name="branch" class="form-control" id="branch" placeholder="Mechanical">
+		      </div>
+		    </div>
+
+		    <div class="form-group">
+		      <label for="hostel" class="col-md-2 control-label">Hostel</label>
+
+		      <div class="col-md-10">
+		        <input type="text" name="hostel" class="form-control" id="hostel" placeholder="Umiam">
+		      </div>
+		    </div>
+		    <input type="submit" class="btn btn-raised btn-success"></input>
+		    <input type="reset" class="btn btn-raised btn-danger"></input>
+		  </fieldset>
+		</form>
+	</div>
+	<script src="js/bootstrap.min.js"></script>	
+	<script src="js/material.min.js"></script>	
+	<script src="js/ripples.min.js"></script>	
+	<script>
+  		$.material.init();
+	</script>
+</body>
+</html>
