@@ -17,18 +17,11 @@ import httplib2
 import pprint
 import gspread
 from dateutil import parser
-import server.py
 
 #Init 
 iq = multiprocessing.Queue();
 oq = multiprocessing.Queue();
 rfas = RfidSystem.RfidSystem(Constants.sql_db,Constants.dbTable,Constants.logTable,iq,oq);
-
-#Putting the server online
-Handler = ServerHandler
-httpd = SocketServer.TCPServer(("", PORT), Handler)
-print "Serving at: http://%(interface)s:%(port)s" % dict(interface=I or "localhost", port=PORT)
-httpd.serve_forever()
 
 #Run waitForCard in separate process.
 reader = Reader.Reader(iq)
@@ -109,7 +102,7 @@ def getLatestRecord(sheet_name, credentials):
 
 #Use first command for chrome, second for chromium
 #subprocess.Popen(["google-chrome","--kiosk","../user_pages/index.html"])
-subprocess.Popen(["chromium-browser","--kiosk","../user_pages/index.html"])
+subprocess.Popen(["chromium-browser","--kiosk","localhost:8000/user_pages"])
 #Start chromix-server. This is crucial for communication between python and chrome.
 subprocess.Popen(["chromix-server"])
 #Wait some time for chromix-server and kiosk to start.

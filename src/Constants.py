@@ -2,7 +2,7 @@
 sql_server = "localhost"
 sql_user = "pi"#"pi"
 sql_pass = "raspberry"#""
-sql_db = "rfid"#"IITG"
+sql_db = "rfid_db"#"IITG"
 dbTable = "rfid_db"#"students"
 logTable = "mess"
 
